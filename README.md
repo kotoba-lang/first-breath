@@ -31,7 +31,7 @@ first-breath/
 ├── breath.cljc             # the cell — babashka port (DEPLOYED impl; no web3/eth_account)
 ├── pyproject.toml          # uv / pip deps: web3, eth-account (python reference impl)
 ├── breath.py               # the cell — original Python module (kept for reference)
-└── state.json              # persistent cell state (counter + last_anchor)
+└── state.edn              # persistent cell state (counter + last_anchor)
 ```
 
 ## Quick run (against local anvil)
@@ -44,7 +44,7 @@ Prereqs:
 built + signed by the pure-Clojure `eth-crypto-clj`, no web3 / no eth_account):
 
 ```bash
-cd 20-actors/first-breath
+cd orgs/etzhayyim/com-etzhayyim-first-breath
 bb breath.cljc            # single breath
 bb breath.cljc --dry-run  # build + SIGN locally, do NOT broadcast (no-server-key)
 bb breath.cljc selftest   # offline EIP-155 sign-path self-check
@@ -77,7 +77,7 @@ Run repeatedly → `Anchor.rootCount()` grows monotonically → the cell is **de
 | Demo (first-breath) | Production cell |
 |---|---|
 | local sha256 of state JSON | proper AT Protocol MST root CID |
-| state.json on disk | AT records on PDS via `@etzhayyim/sdk.write()` |
+| state.edn on disk | AT records on PDS via `@etzhayyim/sdk.write()` |
 | Direct viem anchor call | SDK → `mst-projector` → `ipfs-pinner` → `anchor-cron` → Anchor |
 | anvil at localhost:8545 | geth.etzhayyim.com (private chain) + Base L2 anchor |
 | Hardcoded anvil acct[0] | DID-bound Smart Account + Paymaster sponsorship |

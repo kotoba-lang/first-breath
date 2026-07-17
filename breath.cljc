@@ -20,6 +20,7 @@
 (ns breath
   (:require [babashka.http-client :as http]
             [cheshire.core :as json]
+            [clojure.edn :as edn]
             [eth-crypto.core :as eth]))
 
 ;; ─── Config (env-overridable, identical defaults to breath.py) ───────
@@ -37,19 +38,18 @@
 (def script-dir
   (-> (or (System/getProperty "babashka.file") *file*)
       (java.io.File.) (.getAbsoluteFile) (.getParent)))
-(def STATE-PATH (str script-dir "/state.json"))
+(def STATE-PATH (str script-dir "/state.edn"))
 
 ;; ─── Cell state ─────────────────────────────────────────────────────
 
 (defn load-state []
   (let [f (java.io.File. STATE-PATH)]
     (if (.exists f)
-      (json/parse-string (slurp f))                       ; string keys
-      {"counter" 0 "last_anchor_tx" nil "last_block" 0})))
+      (edn/read-string (slurp f))
+      {:counter 0 :last-anchor-tx nil :last-block 0})))
 
 (defn save-state [state]
-  ;; indent=2 + sort_keys, trailing newline — matches breath.py's json.dumps.
-  (spit STATE-PATH (str (json/generate-string (into (sorted-map) state) {:pretty true}) "\n")))
+  (spit STATE-PATH (str (pr-str (into (sorted-map) state)) "\n")))
 
 (defn iso-now []
   (.format (java.time.OffsetDateTime/now java.time.ZoneOffset/UTC)
@@ -57,15 +57,13 @@
 
 (defn mutate-state [state]
   (-> state
-      (assoc "counter" (inc (or (get state "counter") 0)))
-      (assoc "last_tick_at" (iso-now))))
+      (assoc :counter (inc (or (:counter state) 0)))
+      (assoc :last-tick-at (iso-now))))
 
 (defn state-root ^bytes [state]
-  "Mock MST root = sha256 of canonical-JSON-serialized state (sorted keys, no
-  whitespace) — byte-identical to breath.py's hashlib.sha256(json.dumps(sort_keys,
-  (\",\",\":\"))). Faithful to the python (no on-chain root drift); production swaps
-  this for a proper AT MST root CID (ADR-2605171800), the bytes32 shape unchanged."
-  (let [canon (json/generate-string (into (sorted-map) state))]   ; cheshire = no spaces
+  "Mock MST root = sha256 of the canonical sorted EDN state form. Production swaps
+  this for a proper AT MST root CID (ADR-2605171800); the bytes32 shape is unchanged."
+  (let [canon (pr-str (into (sorted-map) state))]
     (.digest (java.security.MessageDigest/getInstance "SHA-256")
              (.getBytes ^String canon "UTF-8"))))
 
@@ -155,10 +153,10 @@
       (do (binding [*out* *err*] (println (str "[first-breath] cannot reach RPC " RPC-URL))) 2)
       (let [state    (mutate-state (load-state))
             root     (state-root state)
-            ipfs-cid (.getBytes (str "bafyreidemo-breath-" (get state "counter")) "UTF-8")
-            calldata (encode-anchor-call root ipfs-cid (get state "counter"))]
-        (println (str "[first-breath] tick #" (get state "counter")))
-        (println (str "[first-breath]   ts:        " (get state "last_tick_at")))
+            ipfs-cid (.getBytes (str "bafyreidemo-breath-" (:counter state)) "UTF-8")
+            calldata (encode-anchor-call root ipfs-cid (:counter state))]
+        (println (str "[first-breath] tick #" (:counter state)))
+        (println (str "[first-breath]   ts:        " (:last-tick-at state)))
         (println (str "[first-breath]   root:      0x" (eth/bytes->hex root)))
         (println (str "[first-breath]   ipfs_cid:  " (String. ipfs-cid "UTF-8")))
         (let [{:keys [raw from]} (build-and-sign privkey calldata)]
@@ -174,13 +172,13 @@
                 (do (binding [*out* *err*]
                       (println (str "[first-breath] anchor tx reverted: " tx-hash))) 3)
                 (let [block (hex->long (:blockNumber receipt))
-                      state (-> state (assoc "last_anchor_tx" tx-hash) (assoc "last_block" block))]
+                      state (-> state (assoc :last-anchor-tx tx-hash) (assoc :last-block block))]
                   (save-state state)
                   (let [count (eth/strip0x (eth-call ANCHOR-ADDR (str "0x" (selector "rootCount()"))))]
                     (println (str "[first-breath]   anchored:  tx " tx-hash " block " block))
                     (println (str "[first-breath]   verified:  Anchor.rootCount() = "
                                   (BigInteger. count 16))))
-                  (println (str "[first-breath] breath " (get state "counter") " complete."))
+                  (println (str "[first-breath] breath " (:counter state) " complete."))
                   0)))))))))
 
 ;; ─── Offline EIP-155 sign-path self-check ───────────────────────────

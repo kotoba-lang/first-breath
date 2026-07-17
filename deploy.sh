@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # deploy.sh — install first-breath cell on a mini via SSH (cron @60s heartbeat).
 #
-# Idempotent: re-running updates the script + crontab; existing state.json is preserved.
+# Idempotent: re-running updates the script + crontab; existing state.edn is preserved.
 #
 # Usage:
 #   ./deploy.sh <ssh-host> <ssh-user> [<rpc-url>] [<anchor-addr>]
