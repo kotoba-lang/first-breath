@@ -32,7 +32,7 @@ printf "  %-12s  %-10s  %-12s  %s\n" "----" "-------" "----------" "------------
 for h in $FLEET; do
   ssh -o ConnectTimeout=3 -o BatchMode=yes "$h@${h}nomac-mini.local" \
     "cat ~/etzhayyim/first-breath/state.edn 2>/dev/null" 2>/dev/null \
-    | bb -e "(let [s (try (clojure.edn/read-string (slurp *in*)) (catch Throwable _ nil))]
+    | kbb -e "(let [s (try (clojure.edn/read-string (slurp *in*)) (catch Throwable _ nil))]
                (when s (println (str \"$h:counter:\" (get s :counter \"?\")
                                      \":block:\" (get s :last-block \"?\")
                                      \":ts:\" (subs (str (get s :last-tick-at \"?\")) 0 (min 19 (count (str (get s :last-tick-at \"?\")))))))))" \

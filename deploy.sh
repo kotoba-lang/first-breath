@@ -39,13 +39,13 @@ scp -o StrictHostKeyChecking=accept-new \
   "$SCRIPT_DIR/.gitignore" \
   "$USER@$HOST:~/etzhayyim/first-breath/" > /dev/null
 
-# 3) first breath smoke (bb fetches the eth-crypto-clj git dep) + install cron @60s
+# 3) first breath smoke (kbb -M:fetches the eth-crypto-clj git dep) + install cron @60s
 ssh "$USER@$HOST" bash -s -- "$USER" "$RPC" "$ANCHOR" <<'REMOTE_INSTALL'
 set -e
 USER_=$1; RPC=$2; ANCHOR=$3
 export PATH=$HOME/.local/bin:$PATH
 cd ~/etzhayyim/first-breath
-ETZ_RPC="$RPC" ETZ_ANCHOR="$ANCHOR" bb breath.cljk | tail -3
+ETZ_RPC="$RPC" ETZ_ANCHOR="$ANCHOR" kbb breath.cljk | tail -3
 
 # Install crontab (cd into the cell dir so bb resolves the local bb.edn)
 crontab -l 2>/dev/null | grep -v 'first-breath/breath' | grep -v '^ETZ_' > /tmp/cron.bak || true
