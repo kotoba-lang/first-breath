@@ -35,7 +35,7 @@ REMOTE_BOOTSTRAP
 scp -o StrictHostKeyChecking=accept-new \
   "$SCRIPT_DIR/README.md" \
   "$SCRIPT_DIR/bb.edn" \
-  "$SCRIPT_DIR/breath.cljc" \
+  "$SCRIPT_DIR/breath.cljk" \
   "$SCRIPT_DIR/.gitignore" \
   "$USER@$HOST:~/etzhayyim/first-breath/" > /dev/null
 
@@ -45,7 +45,7 @@ set -e
 USER_=$1; RPC=$2; ANCHOR=$3
 export PATH=$HOME/.local/bin:$PATH
 cd ~/etzhayyim/first-breath
-ETZ_RPC="$RPC" ETZ_ANCHOR="$ANCHOR" bb breath.cljc | tail -3
+ETZ_RPC="$RPC" ETZ_ANCHOR="$ANCHOR" bb breath.cljk | tail -3
 
 # Install crontab (cd into the cell dir so bb resolves the local bb.edn)
 crontab -l 2>/dev/null | grep -v 'first-breath/breath' | grep -v '^ETZ_' > /tmp/cron.bak || true
@@ -53,7 +53,7 @@ cat /tmp/cron.bak > /tmp/cron.new
 cat >> /tmp/cron.new <<CRON
 ETZ_RPC=$RPC
 ETZ_ANCHOR=$ANCHOR
-* * * * * cd /Users/$USER_/etzhayyim/first-breath && /Users/$USER_/.local/bin/bb breath.cljc >> /Users/$USER_/etzhayyim/first-breath/breath.log 2>&1
+* * * * * cd /Users/$USER_/etzhayyim/first-breath && /Users/$USER_/.local/bin/bb breath.cljk >> /Users/$USER_/etzhayyim/first-breath/breath.log 2>&1
 CRON
 crontab /tmp/cron.new
 echo "[deploy] cron installed on $USER_@$(hostname -s)"
