@@ -1,5 +1,5 @@
 #!/usr/bin/env bb
-;; breath.cljc — proof-of-life cell for the etzhayyim substrate (cljc port of
+;; breath.cljk — proof-of-life cell for the etzhayyim substrate (cljc port of
 ;; breath.py, ADR clj/bb repo rule). One invocation = one breath: load → mutate →
 ;; save cell state, anchor its evolving state-root to EtzhayyimAnchor on Base L2 /
 ;; geth-private / local anvil.
@@ -11,10 +11,10 @@
 ;; (eth_sendRawTransaction for the write, eth_call for the rootCount read).
 ;;
 ;; Usage:
-;;   bb breath.cljc                 # one breath (defaults = local anvil acct[0])
-;;   bb breath.cljc --dry-run       # build + SIGN locally, do NOT broadcast
-;;   bb breath.cljc selftest        # offline EIP-155 sign-path self-check
-;;   ETZ_RPC=http://… ETZ_ANCHOR=0x… ETZ_PK=0x… bb breath.cljc
+;;   bb breath.cljk                 # one breath (defaults = local anvil acct[0])
+;;   bb breath.cljk --dry-run       # build + SIGN locally, do NOT broadcast
+;;   bb breath.cljk selftest        # offline EIP-155 sign-path self-check
+;;   ETZ_RPC=http://… ETZ_ANCHOR=0x… ETZ_PK=0x… bb breath.cljk
 ;;
 ;; Env (same names as breath.py / deploy.sh): ETZ_RPC, ETZ_ANCHOR, ETZ_PK.
 (ns breath

@@ -28,7 +28,7 @@ v0.0.0 scaffold. Local-only (anvil). Runs once per invocation (cron- or systemd-
 first-breath/
 ├── README.md
 ├── bb.edn                  # babashka deps: eth-crypto-clj (the cljc signer)
-├── breath.cljc             # the cell — babashka port (DEPLOYED impl; no web3/eth_account)
+├── breath.cljk             # the cell — babashka port (DEPLOYED impl; no web3/eth_account)
 ├── pyproject.toml          # uv / pip deps: web3, eth-account (python reference impl)
 ├── breath.py               # the cell — original Python module (kept for reference)
 └── state.edn              # persistent cell state (counter + last_anchor)
@@ -45,11 +45,11 @@ built + signed by the pure-Clojure `eth-crypto-clj`, no web3 / no eth_account):
 
 ```bash
 cd orgs/etzhayyim/com-etzhayyim-first-breath
-bb breath.cljc            # single breath
-bb breath.cljc --dry-run  # build + SIGN locally, do NOT broadcast (no-server-key)
-bb breath.cljc selftest   # offline EIP-155 sign-path self-check
+bb breath.cljk            # single breath
+bb breath.cljk --dry-run  # build + SIGN locally, do NOT broadcast (no-server-key)
+bb breath.cljk selftest   # offline EIP-155 sign-path self-check
 # or repeated:
-while true; do bb breath.cljc; sleep 60; done
+while true; do bb breath.cljk; sleep 60; done
 ```
 
 **python (original reference impl)** — `breath.py` is retained alongside the cljc
